@@ -88,6 +88,7 @@ func main() {
 	st, err := steps.UnmarshalConfigTemplate(configTemplateFile, configDataFile)
 
 	if err != nil {
+		removeTemp()
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -98,6 +99,7 @@ func main() {
 	elapsed := stop.Sub(start)
 
 	fmt.Printf("Time: %s\n", elapsed.Round(time.Millisecond))
+	removeTemp()
 	os.Exit(0)
 
 }
