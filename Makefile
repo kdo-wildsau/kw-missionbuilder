@@ -3,9 +3,10 @@ APP_NAME = kwMissionBuilder
 APP_MAIN = main.go
 MC_DIR = build/bin
 LOG_DIR= build/log
-GIT_VER=$(shell git rev-parse HEAD)
+GIT_VER=$(shell git rev-parse --short HEAD)
+GIT_DATE=$(shell git log -1 --date=format:"%Y/%m/%d" --format="%ad" )
 
-LDFLAGS=-ldflags "-X main.version=${GIT_VER}"
+LDFLAGS=-ldflags "-X main.version=${GIT_VER}(${GIT_DATE})"
 
 .PHONY: dut app.darwin64 app.darwinArm lint clean distclean mrproper
 
