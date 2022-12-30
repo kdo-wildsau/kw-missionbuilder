@@ -1,5 +1,6 @@
 BUILD_DIR = build
-APP = kwMissionBuilder
+APP_NAME = kwMissionBuilder
+APP_MAIN = main.go
 MC_DIR = build/bin
 LOG_DIR= build/log
 GIT_VER=$(shell git rev-parse HEAD)
@@ -27,19 +28,19 @@ app: app.windows app.windows64  app.darwin64 app.darwinArm app.linux64
 
 
 app.windows:
-	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP}.exe -v cmd/deployer/deployer.go
+	GOOS=windows GOARCH=386 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP_NAME}.exe -v ${APP_MAIN}
 
 app.windows64:
-	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP}64.exe -v cmd/deployer/deployer.go
+	GOOS=windows GOARCH=amd64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP_NAME}64.exe -v ${APP_MAIN}
 
 app.darwin64:
-	GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP}-darwin -v cmd/deployer/deployer.go
+	GOOS=darwin GOARCH=amd64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP_NAME}-darwin -v ${APP_MAIN}
 
 app.darwinArm:
-	GOOS=darwin GOARCH=arm64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP}-darwin-arm -v cmd/deployer/deployer.go
+	GOOS=darwin GOARCH=arm64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP_NAME}-darwin-arm -v ${APP_MAIN}
 
 app.linux64:
-	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP}-linux -v cmd/deployer/deployer.go
+	GOOS=linux GOARCH=amd64 go build ${LDFLAGS} -o ${BUILD_DIR}/${APP_NAME}-linux -v ${APP_MAIN}
 
 
 lint:
