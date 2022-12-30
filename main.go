@@ -8,6 +8,7 @@ import (
 	"time"
 
 	gittools "github.com/sebastianRau/deployer/pkg/gitTools"
+	ostools "github.com/sebastianRau/deployer/pkg/osTools"
 	"github.com/sebastianRau/deployer/pkg/steps"
 )
 
@@ -42,6 +43,8 @@ func main() {
 		err error
 	)
 
+	defer removeTemp()
+
 	fmt.Println()
 	id_BasicMissions, err := keyFiles.ReadFile("keys/id_BasicMissions")
 	if err != nil {
@@ -66,20 +69,24 @@ func main() {
 	}
 
 	_, _, err = gittools.UpdateKeyBytes(
+
 		"git@github.com:SebastianRau/KW_BEM_missions.git",
 		"./temp/KW_BEM_missions",
 		id_BasicMissions,
 		"",
 		nil,
 	)
+
 	if err != nil {
 		panic(err.Error())
 	} else {
+
 		fmt.Printf("%-*s %s\n", 80, "Update KW_BEM_missions", "OK")
 	}
 
 	// read and unmarshal template
 	st, err := steps.UnmarshalConfigTemplate(configTemplateFile, configDataFile)
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -92,4 +99,17 @@ func main() {
 
 	fmt.Printf("Time: %s\n", elapsed.Round(time.Millisecond))
 	os.Exit(0)
+
+}
+
+func removeTemp() {
+	err := ostools.Delete(
+		"./temp/",
+		nil,
+	)
+	if err != nil {
+		panic(err.Error())
+	} else {
+		fmt.Printf("%-*s %s\n", 80, "Removing tempfolder", "OK")
+	}
 }
