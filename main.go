@@ -26,11 +26,17 @@ func main() {
 	)
 
 	var (
-		verbose = flag.Bool("v", false, "verbose output")
+		verbose      = flag.Bool("v", false, "verbose output")
+		versionPrint = flag.Bool("version", false, "print version")
 	)
 
 	flag.Parse()
-	fmt.Printf("KW Mission Builder v%s\n", version)
+	if *versionPrint {
+		fmt.Printf("KW Mission Builder %s\n", version)
+		os.Exit(0)
+
+	}
+	fmt.Printf("KW Mission Builder\n")
 
 	var (
 		err error
@@ -85,5 +91,5 @@ func main() {
 	elapsed := stop.Sub(start)
 
 	fmt.Printf("Time: %s\n", elapsed.Round(time.Millisecond))
-
+	os.Exit(0)
 }
