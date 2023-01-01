@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	gittools "github.com/sebastianRau/deployer/pkg/gitTools"
@@ -31,7 +32,13 @@ func main() {
 		versionPrint = flag.Bool("version", false, "print version")
 	)
 
+	var (
+		err   error
+		check bool
+	)
+
 	flag.Parse()
+
 	if *versionPrint {
 		fmt.Printf("KW Mission Builder %s\n", version)
 		os.Exit(0)
@@ -39,9 +46,14 @@ func main() {
 	}
 	fmt.Printf("KW Mission Builder\n")
 
-	var (
-		err error
-	)
+	check, err = CheckKnownHosts("github.com")
+	if err != nil {
+		panic(err)
+	}
+	if !check {
+		fmt.Println("github.com is no present in you known hosts file!\nPlease call\n     ssh -T git@github.com \nto add it to knows hosts")
+		os.Exit(2)
+	}
 
 	defer removeTemp()
 
@@ -114,4 +126,16 @@ func removeTemp() {
 	} else {
 		fmt.Printf("%-*s %s\n", 80, "Removing tempfolder", "OK")
 	}
+}
+
+func CheckKnownHosts(url string) (bool, error) {
+
+	homeDir, err := os.UserHomeDir()
+	knownHosts := homeDir + "/.ssh/known_hosts"
+	bytes, err := os.ReadFile(knownHosts)
+	if err != nil {
+		return false, err
+	}
+
+	return strings.Contains(string(bytes), url), nil
 }
