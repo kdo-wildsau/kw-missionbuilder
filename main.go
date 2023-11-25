@@ -4,17 +4,18 @@ import (
 	"embed"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
 
-	gittools "github.com/sebastianRau/deployer/pkg/gitTools"
-	ostools "github.com/sebastianRau/deployer/pkg/osTools"
-	"github.com/sebastianRau/deployer/pkg/steps"
+	gittools "github.com/sebastianrau/deployer/pkg/gitTools"
+	ostools "github.com/sebastianrau/deployer/pkg/osTools"
+	"github.com/sebastianrau/deployer/pkg/steps"
 )
 
 var (
-	version = "1.0.0"
+	version = "1.0.1"
 )
 
 //go:embed keys/*
@@ -23,8 +24,10 @@ var keyFiles embed.FS
 func main() {
 
 	const (
-		configTemplateFile string = "./temp/KW_BEM_missions/kw_bem_make.json.tpl"
-		configDataFile     string = "./temp/KW_BEM_missions/kw_bem_make.data.json"
+		// TODO change folder name
+
+		configTemplateFile string = "./temp/kw-bem-missions/kw_bem_make.template.yaml"
+		configDataFile     string = "./temp/kw-bem-missions/kw_bem_make.data.yaml"
 	)
 
 	var (
@@ -45,58 +48,65 @@ func main() {
 
 	}
 	fmt.Printf("KW Mission Builder\n")
+	fmt.Println()
 
-	check, err = CheckKnownHosts("github.com")
-	if err != nil {
-		panic(err)
-	}
+	check, _ = CheckKnownHosts("github.com")
 	if !check {
 		fmt.Println("github.com is no present in you known hosts file!\nPlease call\n     ssh -T git@github.com \nto add it to knows hosts")
 		os.Exit(2)
 	}
-
 	defer removeTemp()
 
-	fmt.Println()
 	id_BasicMissions, err := keyFiles.ReadFile("keys/id_BasicMissions")
 	if err != nil {
-		panic("No Keyfile found for id_BasicMissions")
+		fmt.Println("No Keyfile found for id_basic_missions")
+		os.Exit(3)
 	}
+
 	id_BasicScripts, err := keyFiles.ReadFile("keys/id_BasicScripts")
-	if err != nil {
-		panic("No Keyfile found for id_BasicScripts")
+	checkError(err, 1)
+
+	var writer io.Writer
+
+	if *verbose {
+		writer = os.Stdout
+	} else {
+		writer = nil
 	}
 
 	_, _, err = gittools.UpdateKeyBytes(
-		"git@github.com:SebastianRau/KW_BEM_BasicScripts.git",
-		"./temp/KW_BEM_BasicScripts",
+		// TODO change folder name
+
+		"git@github.com:kdo-wildsau/kw-bem-basic-scripts.git",
+		"./temp/kw-bem-basic-scripts",
 		id_BasicScripts,
 		"",
-		nil,
+		writer,
 	)
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err.Error())
+		os.Exit(4)
 	} else {
-		fmt.Printf("%-*s %s\n", 80, "Update KW_BEM_BasicScripts", "OK")
+		fmt.Printf("%-*s %s\n", 80, "Update kw-bem-basic-scripts", "OK")
 	}
 
 	_, _, err = gittools.UpdateKeyBytes(
-
-		"git@github.com:SebastianRau/KW_BEM_missions.git",
-		"./temp/KW_BEM_missions",
+		// TODO change folder name
+		"git@github.com:kdo-wildsau/kw-bem-missions.git",
+		"./temp/kw-bem-missions",
 		id_BasicMissions,
 		"",
-		nil,
+		writer,
 	)
 
 	if err != nil {
-		panic(err.Error())
+		fmt.Println(err.Error())
+		os.Exit(5)
 	} else {
-
-		fmt.Printf("%-*s %s\n", 80, "Update KW_BEM_missions", "OK")
+		fmt.Printf("%-*s %s\n", 80, "Update kw-bem-missions", "OK")
 	}
 
-	// read and unmarshal template
+	// read and unmarshal template / no keyfile needed
 	st, err := steps.UnmarshalConfigTemplate(configTemplateFile, configDataFile)
 
 	if err != nil {
@@ -130,7 +140,7 @@ func removeTemp() {
 
 func CheckKnownHosts(url string) (bool, error) {
 
-	homeDir, err := os.UserHomeDir()
+	homeDir, _ := os.UserHomeDir()
 	knownHosts := homeDir + "/.ssh/known_hosts"
 	bytes, err := os.ReadFile(knownHosts)
 	if err != nil {
@@ -138,4 +148,11 @@ func CheckKnownHosts(url string) (bool, error) {
 	}
 
 	return strings.Contains(string(bytes), url), nil
+}
+
+func checkError(err error, returnCode int) {
+	if err != nil {
+		fmt.Println(err.Error())
+		os.Exit(returnCode)
+	}
 }

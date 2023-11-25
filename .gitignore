@@ -77,6 +77,10 @@ Thumbs.db:encryptable
 ehthumbs.db
 ehthumbs_vista.db
 
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+
 # Dump file
 *.stackdump
 
